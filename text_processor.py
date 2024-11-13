@@ -214,7 +214,7 @@ class TextProcessor:
                 context = para[i:i+block_size]
                 target = para[i+block_size]
 
-                context_idxs = [self.word2idx.get(word, unk_idx) for word in context]
+                context_idxs = self.word_to_index(context) #[self.word2idx.get(word, unk_idx) for word in context]
                 target_idx = self.word2idx.get(target, unk_idx)
                 para_expamples.append((context_idxs, target_idx))
 
@@ -231,3 +231,7 @@ class TextProcessor:
             Y_tensor = Y_tensor.to(device)
         logger.info(f"Built dataset with {len(X_tensor)} examples")
         return X_tensor, Y_tensor
+
+
+    def word_to_index(self, word: List[str]) -> List[int]:
+        return [self.word2idx.get(word, self.word2idx['<UNK>']) for word in word]
