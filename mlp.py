@@ -79,3 +79,18 @@ class NeuralProbabilisticLanguageModel:
 
         avg_loss = total_loss / n_batches
         return avg_loss
+
+    def generate(self, context_idx, n_words, word2idx, end_token='<END>'):
+        if len(context_idx) != self.block_size:
+            raise ValueError(f"Context should have {self.block_size} words")
+        out = []
+        for i in range(n_words):
+            context_tensor = torch.tensor(context_idx, dtype=torch.long).to(self.device)
+            logits = self.forward(context_tensor.unsqueeze(0))
+            probs = torch.softmax(logits, dim=1)
+            next_word_idx = torch.multinomial(probs, num_samples=1).item()
+            context_idx = context_idx[1:] + [next_word_idx]
+            out.append(next_word_idx)
+            if next_word_idx == word2idx[end_token]:
+                break
+        return out
